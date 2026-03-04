@@ -1,4 +1,4 @@
-# Observe the interaction of system components
+# Observe the interaction of the system components
 
 <h4>Time</h4>
 

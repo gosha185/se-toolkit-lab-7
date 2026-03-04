@@ -1,4 +1,4 @@
-# Add Front-end
+# Add Frontend
 
 <h4>Time</h4>
 
