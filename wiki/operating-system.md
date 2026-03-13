@@ -34,19 +34,19 @@ It handles memory allocation, process scheduling, file systems, and device I/O, 
 
 ### `Linux`
 
-`Linux` is an open-source operating system commonly used for servers and [virtual machines](./vm.md).
+`Linux` is an [open-source](./software-types.md#software-types) operating system commonly used for servers and [virtual machines](./vm.md).
 
 See [`Linux`](./linux.md) for more details.
 
 ### `macOS`
 
-`macOS` is `Apple`'s proprietary operating system for `Mac` computers.
+`macOS` is `Apple`'s [proprietary](./software-types.md#proprietary-software) operating system for `Mac` computers.
 
 It is based on `Unix`, so many command-line tools and workflows that work on `Linux` also work on `macOS`.
 
 ### `iOS`
 
-`iOS` is `Apple`'s proprietary operating system for `iPhone`s and `iPad`s.
+`iOS` is `Apple`'s [proprietary](./software-types.md#proprietary-software) operating system for `iPhone`s and `iPad`s.
 
 Like `macOS`, it is based on `Darwin` (a `Unix`-like core), but it is designed for mobile devices with touchscreens rather than desktop computers.
 
