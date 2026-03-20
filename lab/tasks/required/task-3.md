@@ -187,7 +187,7 @@ uv run bot.py --test "lab 4"                 # ambiguous — should clarify what
 | Symptom | Likely cause |
 |---------|-------------|
 | "LLM error: HTTP 401" | Qwen OAuth token expired. Fix: `cd ~/qwen-code-oai-proxy && docker compose restart`. Then test with `curl` again. This is NOT a code bug — tokens expire periodically. |
-| LLM returns text instead of calling tools | System prompt doesn't encourage tool use, or tool descriptions are unclear. Try making descriptions more specific. You can also try a different model — `qwen3.5-plus` may handle tool calling better than `qwen3-coder-plus`. |
+| LLM returns text instead of calling tools | System prompt doesn't encourage tool use, or tool descriptions are unclear. Try making descriptions more specific. |
 | LLM calls wrong tool | Tool descriptions are ambiguous. Make them more specific. |
 | LLM calls `get_items` but doesn't continue | Tool results aren't being fed back to the LLM. Check that your loop appends tool results to the conversation and calls the LLM again. |
 | Answer has no data, just "I don't have the information" | Tool results are in the conversation but the LLM isn't reading them. Check the `role: tool` message format matches what the API expects. |

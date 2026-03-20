@@ -433,7 +433,7 @@ You need a Telegram bot token to run your bot client.
    LMS_API_KEY=same-value-as-in-env-docker-secret
    LLM_API_KEY=your-qwen-api-key-from-step-1.9
    LLM_API_BASE_URL=http://localhost:42005/v1
-   LLM_API_MODEL=qwen3-coder-plus
+   LLM_API_MODEL=coder-model
    ```
 
    The `LMS_API_KEY` must match what you set in `.env.docker.secret`. The `LLM_API_KEY` is the `QWEN_API_KEY` from step 1.9.
@@ -444,7 +444,7 @@ You need a Telegram bot token to run your bot client.
    curl -s http://localhost:42005/v1/chat/completions \
      -H "Authorization: Bearer YOUR_QWEN_API_KEY" \
      -H "Content-Type: application/json" \
-     -d '{"model":"qwen3-coder-plus","messages":[{"role":"user","content":"What is 2+2?"}]}' | head -c 100
+     -d '{"model":"coder-model","messages":[{"role":"user","content":"What is 2+2?"}]}' | head -c 100
    ```
 
    You should see a JSON response containing `"2 + 2 = 4"` or similar. If you get an error, fix the Qwen proxy setup (step 1.9) before continuing — the bot needs a working LLM for Task 3.
