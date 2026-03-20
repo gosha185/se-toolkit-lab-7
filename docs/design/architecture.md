@@ -213,8 +213,8 @@ graph TD
 | Component           | File                      | Description                                                                                                |
 | ------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | Items Router        | `routers/items.py`        | CRUD endpoints for learning items. Always enabled.                                                         |
-| Interactions Router | `routers/interactions.py` | Read and create endpoints for interaction logs. Enabled via `APP_ENABLE_INTERACTIONS=true`.                |
-| Learners Router     | `routers/learners.py`     | CRUD endpoints for learner profiles. Enabled via `APP_ENABLE_LEARNERS=true`.                               |
+| Interactions Router | `routers/interactions.py` | Read and create endpoints for interaction logs. Enabled via `BACKEND_ENABLE_INTERACTIONS=true`.            |
+| Learners Router     | `routers/learners.py`     | CRUD endpoints for learner profiles. Enabled via `BACKEND_ENABLE_LEARNERS=true`.                           |
 | Auth Middleware     | `auth.py`                 | Validates the `Authorization: Bearer <key>` header on every request. Key configured via `API_KEY` env var. |
 | Items DB            | `db/items.py`             | Async database operations for the `item` table.                                                            |
 | Interactions DB     | `db/interactions.py`      | Async database operations for the `interacts` table.                                                       |
@@ -317,7 +317,7 @@ sequenceDiagram
 
 **Rationale:** A single-origin setup eliminates CORS configuration and simplifies the frontend — the SPA uses relative paths instead of an absolute API URL. Caddy also handles TLS termination and port decoupling. The frontend is compiled in a multi-stage Dockerfile (`frontend/Dockerfile`): Node builds the TypeScript bundle, then the output is copied into the Caddy image.
 
-**Configuration:** `CADDY_CONTAINER_PORT` (external) → `APP_CONTAINER_PORT` (FastAPI). Defaults: `42002` → `8000`.
+**Configuration:** `CADDY_CONTAINER_PORT` (external) → `BACKEND_CONTAINER_PORT` (FastAPI). Defaults: `42002` → `8000`.
 
 ---
 
@@ -331,7 +331,7 @@ sequenceDiagram
 
 ### 7.4 Feature Flags for Optional Endpoints
 
-**Decision:** The interactions and learners routers are conditionally included based on environment variables (`APP_ENABLE_INTERACTIONS`, `APP_ENABLE_LEARNERS`).
+**Decision:** The interactions and learners routers are conditionally included based on environment variables (`BACKEND_ENABLE_INTERACTIONS`, `BACKEND_ENABLE_LEARNERS`).
 
 **Rationale:** Students implement parts of the API incrementally across labs. Feature flags let the instructor control which endpoints are active without changing code.
 

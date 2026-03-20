@@ -4,7 +4,7 @@
 
 - [What is `docker-compose.yml`](#what-is-docker-composeyml)
 - [Services](#services)
-  - [`app` service](#app-service)
+  - [`backend` service](#backend-service)
   - [`postgres` service](#postgres-service)
   - [`pgadmin` service](#pgadmin-service)
   - [`caddy` service](#caddy-service)
@@ -13,7 +13,7 @@
 
 ## What is `docker-compose.yml`
 
-[`docker-compose.yml`](../docker-compose.yml) is the [`Docker Compose`](./docker-compose.md#what-is-docker-compose) configuration file for this project. It defines four [services](./docker-compose.md#service) — [`app`](#app-service), [`postgres`](#postgres-service), [`pgadmin`](#pgadmin-service), [`caddy`](#caddy-service) — and one [volume](#volumes).
+[`docker-compose.yml`](../docker-compose.yml) is the [`Docker Compose`](./docker-compose.md#what-is-docker-compose) configuration file for this project. It defines four [services](./docker-compose.md#service) — [`backend`](#backend-service), [`postgres`](#postgres-service), [`pgadmin`](#pgadmin-service), [`caddy`](#caddy-service) — and one [volume](#volumes).
 
 In this project, the services read their configuration from [environment variables](./environments.md#environment-variable) in [`.env.docker.secret`](./dotenv-docker-secret.md#what-is-envdockersecret).
 
@@ -24,14 +24,14 @@ Docs:
 ## Services
 
 <!-- no toc -->
-- [`app` service](#app-service)
+- [`backend` service](#backend-service)
 - [`postgres` service](#postgres-service)
 - [`pgadmin` service](#pgadmin-service)
 - [`caddy` service](#caddy-service)
 
-### `app` service
+### `backend` service
 
-The `app` service runs the [backend web server](./web-infrastructure.md#web-server).
+The `backend` service runs the [backend web server](./web-infrastructure.md#web-server).
 
 It builds from the root [`Dockerfile`](../Dockerfile), which uses a multi-stage build: the first stage installs [`Python`](./python.md#what-is-python) dependencies with [`uv`](./python.md#uv), and the second stage runs the application.
 
@@ -39,8 +39,8 @@ Configuration in [`docker-compose.yml`](../docker-compose.yml):
 
 - **`build: .`** — builds the [image](./docker.md#image) from the [`Dockerfile`](../Dockerfile) in the project root.
 - **`restart: unless-stopped`** — restarts the [container](./docker.md#container) automatically unless it is explicitly stopped.
-- **`ports`** — maps [`APP_HOST_ADDRESS`](./dotenv-docker-secret.md#app_host_address):[`APP_HOST_PORT`](./dotenv-docker-secret.md#app_host_port) on the [host](./computer-networks.md#host) to [`APP_CONTAINER_PORT`](./dotenv-docker-secret.md#app_container_port) inside the container.
-- **`expose`** — makes `APP_CONTAINER_PORT` accessible to other services via [`Docker Compose` networking](./docker-compose.md#docker-compose-networking).
+- **`ports`** — maps [`BACKEND_HOST_ADDRESS`](./dotenv-docker-secret.md#backend_host_address):[`BACKEND_HOST_PORT`](./dotenv-docker-secret.md#backend_host_port) on the [host](./computer-networks.md#host) to [`BACKEND_CONTAINER_PORT`](./dotenv-docker-secret.md#backend_container_port) inside the container.
+- **`expose`** — makes `BACKEND_CONTAINER_PORT` accessible to other services via [`Docker Compose` networking](./docker-compose.md#docker-compose-networking).
 - **`environment`** — passes [environment variables](./environments.md#environment-variable) into the container. The values come from [`.env.docker.secret`](./dotenv-docker-secret.md#what-is-envdockersecret).
 - **`depends_on`** — waits for the [`postgres` service](#postgres-service) to pass its [health check](./docker-compose.md#health-checks) before starting.
 
@@ -71,15 +71,15 @@ Configuration in [`docker-compose.yml`](../docker-compose.yml):
 
 ### `caddy` service
 
-The `caddy` service runs [`Caddy`](./caddy.md#what-is-caddy), a [reverse proxy](./web-infrastructure.md#reverse-proxy) that serves frontend files and forwards [API](./api.md#what-is-an-api) requests to the [`app` service](#app-service).
+The `caddy` service runs [`Caddy`](./caddy.md#what-is-caddy), a [reverse proxy](./web-infrastructure.md#reverse-proxy) that serves frontend files and forwards [API](./api.md#what-is-an-api) requests to the [`backend` service](#backend-service).
 
 It builds from [`frontend/Dockerfile`](../frontend/Dockerfile), which uses a multi-stage build: the first stage builds the frontend with `Node.js`, and the second stage serves the output with `Caddy`.
 
 Configuration in [`docker-compose.yml`](../docker-compose.yml):
 
 - **`build: frontend/`** — builds the [image](./docker.md#image) from the [`Dockerfile`](../frontend/Dockerfile) in the `frontend/` directory.
-- **`depends_on`** — waits for the `app` service to start before starting.
-- **`environment`** — passes [`CADDY_CONTAINER_PORT`](./dotenv-docker-secret.md#caddy_container_port) and [`APP_CONTAINER_PORT`](./dotenv-docker-secret.md#app_container_port) from [`.env.docker.secret`](./dotenv-docker-secret.md#what-is-envdockersecret).
+- **`depends_on`** — waits for the `backend` service to start before starting.
+- **`environment`** — passes [`CADDY_CONTAINER_PORT`](./dotenv-docker-secret.md#caddy_container_port) and [`BACKEND_CONTAINER_PORT`](./dotenv-docker-secret.md#backend_container_port) from [`.env.docker.secret`](./dotenv-docker-secret.md#what-is-envdockersecret).
 - **`ports`** — maps [`LMS_API_HOST_ADDRESS`](./dotenv-docker-secret.md#lms_api_host_address):[`LMS_API_HOST_PORT`](./dotenv-docker-secret.md#lms_api_host_port) on the [host](./computer-networks.md#host) to `CADDY_CONTAINER_PORT` inside the [container](./docker.md#container).
 - **`volumes`** — mounts [`caddy/Caddyfile`](../caddy/Caddyfile) as the [`Caddy` configuration](./caddy.md#caddyfile).
 

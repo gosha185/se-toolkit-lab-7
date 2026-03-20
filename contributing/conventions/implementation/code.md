@@ -63,7 +63,7 @@ quality attribute so the reasoning behind every rule is explicit.
 
 ### Environment variables
 
-- **Backend** — no prefix — e.g., `APP_NAME`, `DATABASE_URL`
+- **Backend** — no prefix — e.g., `BACKEND_NAME`, `DATABASE_URL`
 - **Frontend (`Vite`)** — `VITE_` prefix — e.g., `VITE_API_URL`
 
 ### Markdown / config files

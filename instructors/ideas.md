@@ -51,8 +51,8 @@
 
 - should a section in a sequence of steps assume the previous step?
 - "frontend" and "backend" as nouns
-- Rename app -> backend
-- Rename `APP_` -> `BACK_`
+- ~~Rename app -> backend~~ (done)
+- ~~Rename `APP_` -> `BACKEND_`~~ (done)
 - Add `FRONT_` suffix for front-end variables
 - Always provide links to variables from .env.docker.secret
 - Consistently use "API token" and "API key" naming

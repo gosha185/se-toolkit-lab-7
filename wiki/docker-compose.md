@@ -72,7 +72,7 @@ Other [services](#service) can wait for a container to be healthy before startin
 
 ```yaml
 services:
-  app:
+  backend:
     depends_on:
       postgres:
         condition: service_healthy

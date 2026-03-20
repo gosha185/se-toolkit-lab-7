@@ -100,7 +100,7 @@ The [`Caddyfile`](./caddy.md#caddyfile) at [`caddy/Caddyfile`](../caddy/Caddyfil
 
 ### Forward requests to the backend
 
-`Caddy` routes to the [`app` service](./docker-compose-yml.md#app-service) these [API endpoints](./web-api.md#endpoint):
+`Caddy` routes to the [`backend` service](./docker-compose-yml.md#backend-service) these [API endpoints](./web-api.md#endpoint):
 
 - `/items*`
 - `/learners*`

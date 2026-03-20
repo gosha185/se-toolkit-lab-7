@@ -4,16 +4,16 @@
 
 - [What is `.env.docker.secret`](#what-is-envdockersecret)
 - [`REGISTRY_PREFIX`](#registry_prefix)
-- [`app`](#app)
-  - [`APP_NAME`](#app_name)
-  - [`APP_DEBUG`](#app_debug)
-  - [`APP_RELOAD`](#app_reload)
-  - [`APP_CONTAINER_ADDRESS`](#app_container_address)
-  - [`APP_CONTAINER_PORT`](#app_container_port)
-  - [`APP_HOST_ADDRESS`](#app_host_address)
-  - [`APP_HOST_PORT`](#app_host_port)
-  - [`APP_ENABLE_INTERACTIONS`](#app_enable_interactions)
-  - [`APP_ENABLE_LEARNERS`](#app_enable_learners)
+- [`backend`](#backend)
+  - [`BACKEND_NAME`](#backend_name)
+  - [`BACKEND_DEBUG`](#backend_debug)
+  - [`BACKEND_RELOAD`](#backend_reload)
+  - [`BACKEND_CONTAINER_ADDRESS`](#backend_container_address)
+  - [`BACKEND_CONTAINER_PORT`](#backend_container_port)
+  - [`BACKEND_HOST_ADDRESS`](#backend_host_address)
+  - [`BACKEND_HOST_PORT`](#backend_host_port)
+  - [`BACKEND_ENABLE_INTERACTIONS`](#backend_enable_interactions)
+  - [`BACKEND_ENABLE_LEARNERS`](#backend_enable_learners)
 - [`postgres`](#postgres)
   - [`POSTGRES_DB`](#postgres_db)
   - [`POSTGRES_USER`](#postgres_user)
@@ -63,63 +63,63 @@ The prefix prepended to [Docker image](./docker.md#image) names when pulling bas
 By default, it points to a [`Harbor`](https://goharbor.io/) cache proxy on the university network, which avoids [`DockerHub`](./docker.md#dockerhub) rate limits.
 Outside the university network, set it to an empty string to pull directly from `DockerHub`.
 
-This value is used as a build argument in the [`app`](#app) and [`caddy`](#caddy) service [`Dockerfile`](./docker.md#what-is-docker) builds, and as an image prefix for the [`postgres`](#postgres) and [`pgadmin`](#pgadmin) services in [`docker-compose.yml`](../docker-compose.yml).
+This value is used as a build argument in the [`backend`](#backend) and [`caddy`](#caddy) service [`Dockerfile`](./docker.md#what-is-docker) builds, and as an image prefix for the [`postgres`](#postgres) and [`pgadmin`](#pgadmin) services in [`docker-compose.yml`](../docker-compose.yml).
 
 Default: `harbor.pg.innopolis.university/docker-hub-cache/`
 
-## `app`
+## `backend`
 
-Variables for the backend [`app` service](./docker-compose-yml.md#app-service).
+Variables for the [`backend` service](./docker-compose-yml.md#backend-service).
 
-### `APP_NAME`
+### `BACKEND_NAME`
 
 The display name of the application.
 
 Default: `"Learning Management Service"`
 
-### `APP_DEBUG`
+### `BACKEND_DEBUG`
 
 Enables debug mode in the [web server](./web-infrastructure.md#web-server). When `true`, the server returns detailed error messages.
 
 Default: `false`
 
-### `APP_RELOAD`
+### `BACKEND_RELOAD`
 
 Enables auto-reload. When `true`, the [web server](./web-infrastructure.md#web-server) restarts automatically when source files change.
 
 Default: `false`
 
-### `APP_CONTAINER_ADDRESS`
+### `BACKEND_CONTAINER_ADDRESS`
 
-The [IP address](./computer-networks.md#ip-address) the app [listens on](./computer-networks.md#listen-on-a-port) inside the [container](./docker.md#container). [`0.0.0.0`](./computer-networks.md#0000) means all network interfaces.
+The [IP address](./computer-networks.md#ip-address) the backend [listens on](./computer-networks.md#listen-on-a-port) inside the [container](./docker.md#container). [`0.0.0.0`](./computer-networks.md#0000) means all network interfaces.
 
 Default: `0.0.0.0`
 
-### `APP_CONTAINER_PORT`
+### `BACKEND_CONTAINER_PORT`
 
-The [port number](./computer-networks.md#port-number) the app [listens on](./computer-networks.md#listen-on-a-port) inside the [container](./docker.md#container).
+The [port number](./computer-networks.md#port-number) the backend [listens on](./computer-networks.md#listen-on-a-port) inside the [container](./docker.md#container).
 
 Default: `8000`
 
-### `APP_HOST_ADDRESS`
+### `BACKEND_HOST_ADDRESS`
 
 The [IP address](./computer-networks.md#ip-address) exposed on the [host](./computer-networks.md#host). [`127.0.0.1`](./computer-networks.md#127001) restricts access to the local machine only.
 
 Default: `127.0.0.1`
 
-### `APP_HOST_PORT`
+### `BACKEND_HOST_PORT`
 
-The [port number](./computer-networks.md#port-number) exposed on the [host](./computer-networks.md#host) for accessing the app.
+The [port number](./computer-networks.md#port-number) exposed on the [host](./computer-networks.md#host) for accessing the backend.
 
 Default: `42001`
 
-### `APP_ENABLE_INTERACTIONS`
+### `BACKEND_ENABLE_INTERACTIONS`
 
 A [feature flag](./environments.md#feature-flag) for enabling the `/interactions` endpoint.
 
 Default: `true`
 
-### `APP_ENABLE_LEARNERS`
+### `BACKEND_ENABLE_LEARNERS`
 
 A [feature flag](./environments.md#feature-flag) for enabling the `/learners` endpoint.
 

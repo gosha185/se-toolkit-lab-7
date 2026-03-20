@@ -227,7 +227,7 @@ All run via SSH as `cd ~/se-toolkit-lab-7/bot && uv run bot.py --test "<input>"`
 | t2-eval-scores | `/scores lab-04` | ≥2 lines, contains task names | From task |
 | t2-eval-scores-other | `/scores lab-01` | ≥2 lines, non-empty | Unseen — different lab |
 | t2-eval-scores-noarg | `/scores` | non-empty, no `Traceback` | Unseen — missing argument |
-| t2-eval-error | `/health` (backend stopped) | contains error info, no `Traceback` | From task — stop `app`, test, restart |
+| t2-eval-error | `/health` (backend stopped) | contains error info, no `Traceback` | From task — stop `backend`, test, restart |
 
 > `--test` mode hits the real backend on localhost. No mock needed.
 

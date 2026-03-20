@@ -177,7 +177,7 @@ This section explains what each configuration artifact exists for and why it is 
 All items in this category are conditional — include only when the lab involves containerization or remote deployment. See [Docker and deployment pattern](#8-docker-and-deployment-pattern) for the full pattern.
 
 - [`Dockerfile`](../Dockerfile) — Multi-stage build for the application. Builder stage installs dependencies; final stage runs as a non-root user. Uses the institutional container registry for base images.
-- [`docker-compose.yml`](../docker-compose.yml) — Orchestrates services (e.g., `app`, `postgres`, `pgadmin`, `caddy`). All ports and credentials are parameterized via environment variables from `.env.docker.secret`.
+- [`docker-compose.yml`](../docker-compose.yml) — Orchestrates services (e.g., `backend`, `postgres`, `pgadmin`, `caddy`). All ports and credentials are parameterized via environment variables from `.env.docker.secret`.
 - [`.dockerignore`](../.dockerignore) — Excludes tests, docs, Markdown files, `.git/`, and caches from the Docker build context to keep images small.
 - [`caddy/Caddyfile`](../caddy/Caddyfile) — Reverse proxy routing. Forwards API paths to the backend and serves static frontend files.
 
@@ -357,12 +357,12 @@ If the lab involves deployment:
 
 1. Provide [`.env.docker.example`](../.env.docker.example) as templates.
 2. Students copy them to `.env.secret` and `.env.docker.secret` (which are `.gitignore`d via the `*.secret` pattern).
-3. Use [`docker-compose.yml`](../docker-compose.yml) with environment variable substitution from `.env.docker.secret` (e.g., `${APP_HOST_PORT}`). Parameterize all ports, host addresses, and credentials.
+3. Use [`docker-compose.yml`](../docker-compose.yml) with environment variable substitution from `.env.docker.secret` (e.g., `${BACKEND_HOST_PORT}`). Parameterize all ports, host addresses, and credentials.
 4. Include a reverse proxy service (e.g., Caddy) in [`docker-compose.yml`](../docker-compose.yml).
 5. Use a multi-stage [`Dockerfile`](../Dockerfile) for production builds (builder stage + slim runtime).
 6. Deployment task flow: SSH into VM → clone repo → create `.env.docker.secret` → `docker compose up --build -d`.
 7. Distinguish local vs remote env differences:
-   - Local: `APP_HOST_ADDRESS=127.0.0.1` (localhost only).
+   - Local: `BACKEND_HOST_ADDRESS=127.0.0.1` (localhost only).
    - Remote: `LMS_API_HOST_ADDRESS=0.0.0.0` (accessible from outside).
 8. **Use an institutional container registry** (e.g., Harbor cache proxy) for base images to avoid Docker Hub rate limits. Reference the registry in [`docker-compose.yml`](../docker-compose.yml) image fields instead of pulling directly from Docker Hub.
 

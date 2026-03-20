@@ -147,7 +147,7 @@ Replace **`YOUR_VM_USERNAME`** and **`YOUR_VM_IP`** with your values.
 
    ```terminal
    SERVICE    STATUS
-   app        Up 50 seconds
+   backend    Up 50 seconds
    caddy      Up 49 seconds
    pgadmin    Up 50 seconds
    postgres   Up 55 seconds (healthy)

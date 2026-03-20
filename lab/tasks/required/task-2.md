@@ -46,7 +46,7 @@ Backend error: connection refused (localhost:42002). Check that the services are
 
 ```terminal
 $ uv run bot.py --test "/health"
-Backend error: HTTP 502 Bad Gateway. The app service may be down.
+Backend error: HTTP 502 Bad Gateway. The backend service may be down.
 ```
 
 Bad — hides the error (useless for debugging):
@@ -140,10 +140,10 @@ Stop the backend and verify the bot handles it gracefully:
 
 ```terminal
 cd ~/se-toolkit-lab-7
-docker compose --env-file .env.docker.secret stop app
+docker compose --env-file .env.docker.secret stop backend
 cd bot && uv run bot.py --test "/health"
 cd ~/se-toolkit-lab-7
-docker compose --env-file .env.docker.secret start app
+docker compose --env-file .env.docker.secret start backend
 ```
 
 The response must include the actual error (e.g., "connection refused") — not a raw traceback, and not a vague "something went wrong."

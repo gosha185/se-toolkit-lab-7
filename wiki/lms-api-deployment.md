@@ -125,7 +125,7 @@ This page describes how to deploy the [LMS API](./lms-api.md#about-the-lms-api) 
    >
    > 1. See [DNS resolution errors](./docker.md#dns-resolution-errors).
    >
-   > **`=> ERROR [app builder 3/6] RUN --mount=type=cache,target=/root/.cache/uv`**
+   > **`=> ERROR [backend builder 3/6] RUN --mount=type=cache,target=/root/.cache/uv`**
    >
    > 1. See [DNS resolution errors](./docker.md#dns-resolution-errors).
 
@@ -141,7 +141,7 @@ This page describes how to deploy the [LMS API](./lms-api.md#about-the-lms-api) 
 
    ```text
    SERVICE    STATUS
-   app        Up 50 seconds
+   backend    Up 50 seconds
    caddy      Up 49 seconds
    pgadmin    Up 50 seconds
    postgres   Up 55 seconds (healthy)

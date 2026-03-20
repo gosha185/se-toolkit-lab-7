@@ -7,8 +7,8 @@
 - [`PORT`](#port)
 - [`RELOAD`](#reload)
 - [`LMS_API_KEY`](#lms_api_key)
-- [`APP_ENABLE_INTERACTIONS`](#app_enable_interactions)
-- [`APP_ENABLE_LEARNERS`](#app_enable_learners)
+- [`BACKEND_ENABLE_INTERACTIONS`](#backend_enable_interactions)
+- [`BACKEND_ENABLE_LEARNERS`](#backend_enable_learners)
 - [`DB_HOST`](#db_host)
 - [`DB_PORT`](#db_port)
 - [`DB_NAME`](#db_name)
@@ -27,31 +27,31 @@ Default values: [`backend/.env.tests.unit.example`](../backend/.env.tests.unit.e
 
 ## `NAME`
 
-See [`APP_NAME`](./dotenv-docker-secret.md#app_name) in [`.env.docker.secret`](./dotenv-docker-secret.md#what-is-envdockersecret).
+See [`BACKEND_NAME`](./dotenv-docker-secret.md#backend_name) in [`.env.docker.secret`](./dotenv-docker-secret.md#what-is-envdockersecret).
 
 Default: `"Learning Management Service"`
 
 ## `DEBUG`
 
-See [`APP_DEBUG`](./dotenv-docker-secret.md#app_debug) in `.env.docker.secret`.
+See [`BACKEND_DEBUG`](./dotenv-docker-secret.md#backend_debug) in `.env.docker.secret`.
 
 Default: `false`
 
 ## `ADDRESS`
 
-The [IP address](./computer-networks.md#ip-address) the app [listens on](./computer-networks.md#listen-on-a-port) during tests. [`127.0.0.1`](./computer-networks.md#127001) restricts access to the local machine only.
+The [IP address](./computer-networks.md#ip-address) the backend [listens on](./computer-networks.md#listen-on-a-port) during tests. [`127.0.0.1`](./computer-networks.md#127001) restricts access to the local machine only.
 
 Default: `127.0.0.1`
 
 ## `PORT`
 
-The [port number](./computer-networks.md#port-number) the app [listens on](./computer-networks.md#listen-on-a-port) during tests.
+The [port number](./computer-networks.md#port-number) the backend [listens on](./computer-networks.md#listen-on-a-port) during tests.
 
 Default: `8000`
 
 ## `RELOAD`
 
-See [`APP_RELOAD`](./dotenv-docker-secret.md#app_reload) in [`.env.docker.secret`](./dotenv-docker-secret.md#what-is-envdockersecret).
+See [`BACKEND_RELOAD`](./dotenv-docker-secret.md#backend_reload) in [`.env.docker.secret`](./dotenv-docker-secret.md#what-is-envdockersecret).
 
 Default: `false`
 
@@ -61,15 +61,15 @@ See [`LMS_API_KEY`](./dotenv-docker-secret.md#lms_api_key) in [`.env.docker.secr
 
 Default: `test`
 
-## `APP_ENABLE_INTERACTIONS`
+## `BACKEND_ENABLE_INTERACTIONS`
 
-See [`APP_ENABLE_INTERACTIONS`](./dotenv-docker-secret.md#app_enable_interactions) in [`.env.docker.secret`](./dotenv-docker-secret.md#what-is-envdockersecret).
+See [`BACKEND_ENABLE_INTERACTIONS`](./dotenv-docker-secret.md#backend_enable_interactions) in [`.env.docker.secret`](./dotenv-docker-secret.md#what-is-envdockersecret).
 
 Default: `true`
 
-## `APP_ENABLE_LEARNERS`
+## `BACKEND_ENABLE_LEARNERS`
 
-See [`APP_ENABLE_LEARNERS`](./dotenv-docker-secret.md#app_enable_learners) in [`.env.docker.secret`](./dotenv-docker-secret.md#what-is-envdockersecret).
+See [`BACKEND_ENABLE_LEARNERS`](./dotenv-docker-secret.md#backend_enable_learners) in [`.env.docker.secret`](./dotenv-docker-secret.md#what-is-envdockersecret).
 
 Default: `true`
 

@@ -27,7 +27,7 @@ Add a `bot` service to the existing compose file:
 - Restarts unless stopped
 
 > [!IMPORTANT]
-> **Docker networking change.** Until now, the bot ran on the host and used `localhost:42002` to reach the backend. Inside Docker, `localhost` means the container itself. The bot must use the Docker service name instead: `http://app:8000`.
+> **Docker networking change.** Until now, the bot ran on the host and used `localhost:42002` to reach the backend. Inside Docker, `localhost` means the container itself. The bot must use the Docker service name instead: `http://backend:8000`.
 >
 > **Qwen proxy networking.** The Qwen Code API proxy is a **separate** docker-compose project — it's on a different Docker network. The bot container can't reach it by service name or via `localhost`. To reach host-mapped ports from inside a container on Linux, use `extra_hosts` with `host.docker.internal`:
 >
@@ -60,7 +60,7 @@ docker compose --env-file .env.docker.secret up --build -d
 docker compose --env-file .env.docker.secret ps
 ```
 
-You should see the `bot` service running alongside `app`, `postgres`, `caddy`.
+You should see the `bot` service running alongside `backend`, `postgres`, `caddy`.
 
 ### Check the bot container is healthy
 
@@ -91,7 +91,7 @@ Send these in Telegram — everything that worked before should still work:
 | Symptom | Likely cause |
 |---------|-------------|
 | Bot container keeps restarting | Check logs: `docker compose logs bot`. Usually a missing env var or import error. |
-| `/health` fails but worked before | `LMS_API_URL` must be `http://app:8000` (not `localhost:42002`). Inside Docker, `localhost` is the container itself. |
+| `/health` fails but worked before | `LMS_API_URL` must be `http://backend:8000` (not `localhost:42002`). Inside Docker, `localhost` is the container itself. |
 | LLM queries fail but worked before | `LLM_API_BASE_URL` must use `host.docker.internal` (not `localhost`). The qwen proxy is on a different Docker network. |
 | "BOT_TOKEN is required" error | Bot env vars need to be in `.env.docker.secret`, not just `.env.bot.secret`. |
 | Build fails at `uv sync --frozen` | `uv.lock` must be copied in the Dockerfile. Check your `COPY` commands. |
