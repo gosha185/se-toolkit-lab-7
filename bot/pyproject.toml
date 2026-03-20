@@ -1,0 +1,17 @@
+[project]
+name = "se-toolkit-bot"
+version = "0.1.0"
+description = "Telegram bot for LMS interaction"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aiogram>=3.0.0",
+    "httpx>=0.28.0",
+    "python-dotenv>=1.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.25.0",
+]
