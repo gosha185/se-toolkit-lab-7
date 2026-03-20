@@ -65,28 +65,29 @@ def parse_command(text: str) -> tuple[str, list[str]]:
 
 async def run_test_mode(command: str) -> None:
     """Run a command in test mode and print result to stdout.
-    
+
     This allows testing handlers without Telegram connection.
     """
+    config = load_config()
     cmd, args = parse_command(command)
-    
+
     # Route to appropriate handler
     if cmd == "start":
-        result = await handle_start(args)
+        result = await handle_start(args, config)
     elif cmd == "help":
-        result = await handle_help(args)
+        result = await handle_help(args, config)
     elif cmd == "health":
-        result = await handle_health(args)
+        result = await handle_health(args, config)
     elif cmd == "labs":
-        result = await handle_labs(args)
+        result = await handle_labs(args, config)
     elif cmd == "scores":
-        result = await handle_scores(args)
+        result = await handle_scores(args, config)
     elif cmd == "":
         # Plain text query
-        result = await handle_unknown(command)
+        result = await handle_unknown(command, config)
     else:
         result = f"❌ Unknown command: /{cmd}\n\nUse /help to see available commands."
-    
+
     print(result)
 
 
@@ -95,44 +96,44 @@ async def run_telegram_mode() -> None:
     if not AIOMGRAM_AVAILABLE:
         logger.error("aiogram not installed. Install with: uv add aiogram")
         sys.exit(1)
-    
+
     config = load_config()
-    
+
     if not config.bot_token:
         logger.error("BOT_TOKEN not found in .env.bot.secret")
         sys.exit(1)
-    
+
     bot = Bot(token=config.bot_token)
     dp = Dispatcher()
-    
+
     # Register command handlers
     @dp.message(Command("start"))
     async def start_handler(message: types.Message):
-        result = await handle_start()
+        result = await handle_start(config=config)
         await message.answer(result)
-    
+
     @dp.message(Command("help"))
     async def help_handler(message: types.Message):
-        result = await handle_help()
+        result = await handle_help(config=config)
         await message.answer(result)
-    
+
     @dp.message(Command("health"))
     async def health_handler(message: types.Message):
-        result = await handle_health()
+        result = await handle_health(config=config)
         await message.answer(result)
-    
+
     @dp.message(Command("labs"))
     async def labs_handler(message: types.Message):
-        result = await handle_labs()
+        result = await handle_labs(config=config)
         await message.answer(result)
-    
+
     @dp.message(Command("scores"))
     async def scores_handler(message: types.Message, command: types.Command):
         # Parse arguments from command
         args = command.args.split() if command.args else []
-        result = await handle_scores(args)
+        result = await handle_scores(args, config=config)
         await message.answer(result)
-    
+
     logger.info("Bot started in Telegram mode")
     await dp.start_polling(bot)
 
