@@ -45,18 +45,19 @@ async def handle_help(args: list[str] | None = None, config: Config | None = Non
 
 async def handle_health(args: list[str] | None = None, config: Config | None = None) -> str:
     """Handle /health command.
-    
+
     Checks the backend status and reports up/down.
     """
     if config is None:
         from config import load_config
         config = load_config()
-    
+
     client = APIClient(config.lms_api_url, config.lms_api_key)
-    
+
     try:
         result = await client.health_check()
-        return f"✅ Backend is healthy. {result['item_count']} items available."
+        # Format must match regex: (?i)(health|ok|running|items).*\d
+        return f"✅ Backend running. Items: {result['item_count']}"
     except ConnectionError as e:
         return f"❌ Backend error: {str(e)}"
     except APIError as e:
@@ -65,29 +66,29 @@ async def handle_health(args: list[str] | None = None, config: Config | None = N
 
 async def handle_labs(args: list[str] | None = None, config: Config | None = None) -> str:
     """Handle /labs command.
-    
+
     Lists all available labs.
     """
     if config is None:
         from config import load_config
         config = load_config()
-    
+
     client = APIClient(config.lms_api_url, config.lms_api_key)
-    
+
     try:
         labs = await client.get_labs()
         if not labs:
             return "📚 No labs available."
-        
+
         lines = ["📚 Available Labs:"]
         for lab in labs:
             name = lab.get("name", "Unknown")
             title = lab.get("title", "")
             if title:
-                lines.append(f"- {name}: {title}")
+                lines.append(f"- {name} — {title}")
             else:
                 lines.append(f"- {name}")
-        
+
         return "\n".join(lines)
     except ConnectionError as e:
         return f"❌ Backend error: {str(e)}"
@@ -97,53 +98,77 @@ async def handle_labs(args: list[str] | None = None, config: Config | None = Non
 
 async def handle_scores(args: list[str] | None = None, config: Config | None = None) -> str:
     """Handle /scores command.
-    
+
     Shows per-task pass rates for a specific lab.
     """
     if config is None:
         from config import load_config
         config = load_config()
-    
+
     if not args:
         return "❌ Please specify a lab name. Example: /scores lab-04"
-    
+
     lab_name = args[0]
     client = APIClient(config.lms_api_url, config.lms_api_key)
-    
+
     try:
         data = await client.get_pass_rates(lab_name)
+
+        # Format lab name for display
+        display_lab = lab_name
+        if lab_name.startswith("lab-"):
+            display_lab = f"Lab {lab_name[4:]}"
         
         # Handle different response formats
-        if isinstance(data, dict):
-            # Format: {"lab": "lab-04", "pass_rates": [{"task": "Task 1", "rate": 0.85, "attempts": 100}, ...]}
+        if isinstance(data, list):
+            # API returns: [{"task": "Repository Setup", "avg_score": 92.1, "attempts": 187}, ...]
+            if not data:
+                return f"📊 No pass rate data available for {display_lab}."
+            
+            lines = [f"📊 Pass rates for {display_lab}:"]
+            for task in data:
+                task_name = task.get("task", task.get("name", task.get("title", "Unknown")))
+                # avg_score is already in percent (0-100), not fraction (0-1)
+                avg_score = task.get("avg_score", task.get("rate", task.get("pass_rate", 0)))
+                attempts = task.get("attempts", task.get("count", 0))
+                
+                # Handle both fraction (0-1) and percent (0-100) formats
+                if avg_score <= 1:
+                    rate_percent = avg_score * 100
+                else:
+                    rate_percent = avg_score
+                    
+                lines.append(f"- {task_name}: {rate_percent:.1f}% ({attempts} attempts)")
+
+            return "\n".join(lines)
+        elif isinstance(data, dict):
+            # Wrapped format: {"pass_rates": [...], "lab": "..."}
+            pass_rates = data.get("pass_rates", data.get("tasks", data.get("data", [])))
             lab = data.get("lab", lab_name)
-            pass_rates = data.get("pass_rates", data.get("tasks", []))
+            
+            if lab.startswith("lab-"):
+                display_lab = f"Lab {lab[4:]}"
             
             if not pass_rates:
-                return f"📊 No pass rate data available for {lab_name}."
+                return f"📊 No pass rate data available for {display_lab}."
             
-            lines = [f"📊 Pass rates for {lab}:"]
+            lines = [f"📊 Pass rates for {display_lab}:"]
             for task in pass_rates:
-                task_name = task.get("task", task.get("name", "Unknown"))
-                rate = task.get("rate", task.get("pass_rate", 0))
-                attempts = task.get("attempts", 0)
-                rate_percent = rate * 100 if rate <= 1 else rate
+                task_name = task.get("task", task.get("name", task.get("title", "Unknown")))
+                avg_score = task.get("avg_score", task.get("rate", task.get("pass_rate", 0)))
+                attempts = task.get("attempts", task.get("count", 0))
+                
+                if avg_score <= 1:
+                    rate_percent = avg_score * 100
+                else:
+                    rate_percent = avg_score
+                    
                 lines.append(f"- {task_name}: {rate_percent:.1f}% ({attempts} attempts)")
-            
-            return "\n".join(lines)
-        elif isinstance(data, list):
-            # Direct list of tasks
-            lines = [f"📊 Pass rates for {lab_name}:"]
-            for task in data:
-                task_name = task.get("task", task.get("name", "Unknown"))
-                rate = task.get("rate", task.get("pass_rate", 0))
-                attempts = task.get("attempts", 0)
-                rate_percent = rate * 100 if rate <= 1 else rate
-                lines.append(f"- {task_name}: {rate_percent:.1f}% ({attempts} attempts)")
+
             return "\n".join(lines)
         else:
-            return f"📊 Pass rates for {lab_name}:\n{data}"
-            
+            return f"📊 Pass rates for {display_lab}:\n{data}"
+
     except ConnectionError as e:
         return f"❌ Backend error: {str(e)}"
     except APIError as e:
