@@ -53,16 +53,16 @@ Handlers are plain functions that take input and return text. They have no depen
 - Handlers return placeholder text (no real API calls yet)
 - Project structure matches the architecture diagram
 
-## Task 2: Backend Integration
+## Task 2: Backend Integration ✅ COMPLETED
 
 **Goal:** Connect handlers to the LMS backend with real data.
 
 **Deliverables:**
 - `bot/services/api_client.py` — HTTP client for LMS API with Bearer auth
 - Update handlers to call real endpoints:
-  - `/health` → `GET /health` → reports up/down status
-  - `/labs` → `GET /items` → lists available labs
-  - `/scores <lab>` → `GET /analytics/{lab_id}` → per-task pass rates
+  - `/health` → `GET /items/` → reports up/down status
+  - `/labs` → `GET /items/` → lists available labs
+  - `/scores <lab>` → `GET /analytics/pass-rates?lab=` → per-task pass rates
 - Error handling for backend failures (friendly messages, not crashes)
 
 **Key pattern: API Client with Bearer Auth**
@@ -73,10 +73,34 @@ Authorization: Bearer <LMS_API_KEY>
 ```
 
 **Acceptance criteria:**
-- `/health` returns real backend status
-- `/labs` lists actual labs from the database
-- `/scores lab-04` returns pass rates for that lab
-- Backend down → friendly message like "LMS is currently unavailable"
+- `/health` returns real backend status ✅
+- `/labs` lists actual labs from the database ✅
+- `/scores lab-04` returns pass rates for that lab ✅
+- Backend down → friendly message with actual error (e.g., "connection refused") ✅
+
+**Test results:**
+```
+$ uv run bot.py --test "/start"
+👋 Welcome to the LMS Bot! ...
+
+$ uv run bot.py --test "/help"
+📖 Available Commands: ...
+
+$ uv run bot.py --test "/health"
+❌ Backend error: connection refused (http://localhost:42002). Check that the services are running.
+
+$ uv run bot.py --test "/labs"
+❌ Backend error: connection refused (http://localhost:42002). Check that the services are running.
+
+$ uv run bot.py --test "/scores lab-04"
+❌ Backend error: connection refused (http://localhost:42002). Check that the services are running.
+
+$ uv run bot.py --test "/scores"
+❌ Please specify a lab name. Example: /scores lab-04
+
+$ uv run bot.py --test "/unknown"
+❌ Unknown command: /unknown
+```
 
 ## Task 3: Intent-Based Natural Language Routing
 
