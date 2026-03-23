@@ -84,20 +84,29 @@ class APIClient:
     
     async def get_labs(self) -> list[dict]:
         """Get all available labs.
-        
+
         Returns:
             List of lab dictionaries with 'id', 'name', 'title' keys
         """
         try:
             items = await self._request("GET", "/items/")
-            # Filter for labs (type might be 'lab' or have lab-like structure)
+            # Filter for labs only (type == "lab")
             labs = []
             for item in items:
-                if isinstance(item, dict):
+                if isinstance(item, dict) and item.get("type") == "lab":
+                    name = item.get("name", "Unknown")
+                    title = item.get("title", item.get("description", ""))
+                    
+                    # Convert "lab-01" to "Lab 01" for display
+                    display_name = name
+                    if name.startswith("lab-"):
+                        lab_num = name[4:]  # Get "01" from "lab-01"
+                        display_name = f"Lab {lab_num}"
+                    
                     labs.append({
-                        "id": item.get("id", item.get("name", "unknown")),
-                        "name": item.get("name", "Unknown"),
-                        "title": item.get("title", item.get("description", ""))
+                        "id": item.get("id", name),
+                        "name": display_name,
+                        "title": title
                     })
             return labs
         except (ConnectionError, APIError):
