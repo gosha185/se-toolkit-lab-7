@@ -9,38 +9,62 @@ from typing import Any
 
 from services.api_client import APIClient, APIError, ConnectionError
 from config import Config
+from handlers.keyboard import get_quick_actions_keyboard, format_keyboard_message
+from handlers.intent_router import handle_natural_language
+
+__all__ = [
+    "handle_start",
+    "handle_help",
+    "handle_health",
+    "handle_labs",
+    "handle_scores",
+    "handle_unknown",
+    "handle_natural_language",
+]
 
 
 async def handle_start(args: list[str] | None = None, config: Config | None = None) -> str:
     """Handle /start command.
-    
+
     Returns a welcome message for new users.
     """
-    return (
+    text = (
         "👋 Welcome to the LMS Bot!\n\n"
         "I can help you check system health, browse labs, and view scores.\n\n"
         "Available commands:\n"
         "/help - Show this help message\n"
         "/health - Check backend status\n"
         "/labs - List available labs\n"
-        "/scores <lab> - View scores for a lab"
+        "/scores <lab> - View scores for a lab\n\n"
+        "You can also ask questions in plain language!"
     )
+    # Add keyboard hints
+    keyboard = get_quick_actions_keyboard()
+    return format_keyboard_message(text, keyboard)
 
 
 async def handle_help(args: list[str] | None = None, config: Config | None = None) -> str:
     """Handle /help command.
-    
+
     Returns a list of available commands with descriptions.
     """
-    return (
+    text = (
         "📖 Available Commands:\n\n"
         "/start - Welcome message\n"
         "/help - Show this help\n"
         "/health - Check if LMS backend is running\n"
         "/labs - List all available labs\n"
         "/scores <lab-name> - View pass rates for a specific lab\n\n"
-        "You can also ask questions in plain language!"
+        "You can also ask questions in plain language!\n\n"
+        "Examples:\n"
+        "• \"what labs are available?\"\n"
+        "• \"show me scores for lab 4\"\n"
+        "• \"which lab has the lowest pass rate?\"\n"
+        "• \"who are the top 5 students?\""
     )
+    # Add keyboard hints
+    keyboard = get_quick_actions_keyboard()
+    return format_keyboard_message(text, keyboard)
 
 
 async def handle_health(args: list[str] | None = None, config: Config | None = None) -> str:
@@ -160,17 +184,14 @@ async def handle_scores(args: list[str] | None = None, config: Config | None = N
 
 
 async def handle_unknown(text: str, config: Config | None = None) -> str:
-    """Handle plain text queries.
-    
-    For Task 3, this will use LLM for intent routing.
-    For now, returns a helpful message.
+    """Handle plain text queries using LLM intent routing.
+
+    Uses the LLM to understand user intent and call appropriate tools.
     """
-    return (
-        "🤔 I'm not sure how to help with that yet.\n\n"
-        "Try one of these commands:\n"
-        "/health - Check backend status\n"
-        "/labs - List available labs\n"
-        "/scores <lab> - View scores for a lab\n"
-        "/help - Show all commands\n\n"
-        "(LLM routing will be added in Task 3)"
-    )
+    if config is None:
+        from config import load_config
+        config = load_config()
+
+    # Use LLM-based intent router
+    from handlers.intent_router import handle_natural_language
+    return await handle_natural_language(text, config)
