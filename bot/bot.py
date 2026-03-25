@@ -25,6 +25,7 @@ from handlers import (
     handle_help,
     handle_health,
     handle_labs,
+    handle_natural_language,
     handle_scores,
     handle_start,
     handle_unknown,
@@ -83,8 +84,8 @@ async def run_test_mode(command: str) -> None:
     elif cmd == "scores":
         result = await handle_scores(args, config)
     elif cmd == "":
-        # Plain text query
-        result = await handle_unknown(command, config)
+        # Plain text query - use LLM intent routing
+        result = await handle_natural_language(command, config)
     else:
         result = f"❌ Unknown command: /{cmd}\n\nUse /help to see available commands."
 
@@ -132,6 +133,12 @@ async def run_telegram_mode() -> None:
         # Parse arguments from command
         args = command.args.split() if command.args else []
         result = await handle_scores(args, config=config)
+        await message.answer(result)
+
+    # Handle plain text messages with LLM
+    @dp.message()
+    async def text_handler(message: types.Message):
+        result = await handle_natural_language(message.text, config=config)
         await message.answer(result)
 
     logger.info("Bot started in Telegram mode")

@@ -102,13 +102,14 @@ $ uv run bot.py --test "/unknown"
 ❌ Unknown command: /unknown
 ```
 
-## Task 3: Intent-Based Natural Language Routing
+## Task 3: Intent-Based Natural Language Routing ✅ COMPLETED
 
 **Goal:** Enable plain language queries using LLM tool use.
 
 **Deliverables:**
-- `bot/services/llm_client.py` — LLM client for intent classification
-- `bot/handlers/intent_router.py` — routes plain text to handlers via LLM
+- `bot/services/llm_client.py` — LLM client for intent classification with OpenAI-compatible API
+- `bot/handlers/intent_router.py` — routes plain text to handlers via LLM with tool execution loop
+- `bot/handlers/keyboard.py` — inline keyboard buttons for common actions
 - Tool definitions for all 9 backend endpoints
 - System prompt that teaches the LLM when to use each tool
 
@@ -118,26 +119,77 @@ The LLM reads tool descriptions to decide which API to call. Example:
 ```python
 tools = [
     {
-        "name": "get_health",
-        "description": "Check if the LMS backend is running",
-        "parameters": {}
+        "type": "function",
+        "function": {
+            "name": "get_pass_rates",
+            "description": "Get per-task average scores and attempt counts for a specific lab",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "lab": {"type": "string", "description": "Lab identifier, e.g., 'lab-01'"}
+                },
+                "required": ["lab"],
+            },
+        },
     },
-    {
-        "name": "get_labs",
-        "description": "List all available labs",
-        "parameters": {}
-    },
-    # ... more tools
+    # ... 8 more tools
 ]
 ```
 
-When a user asks "what labs are available?", the LLM calls `get_labs`.
+**Tool execution loop:**
+1. User sends message → bot sends to LLM with tool definitions
+2. LLM returns tool calls → bot executes each tool
+3. Tool results fed back to LLM → LLM summarizes
+4. Bot sends final answer to user
 
 **Acceptance criteria:**
-- Plain text queries work: "what labs are available" → lists labs
-- LLM calls correct tool based on user intent
-- Tool descriptions are clear enough for the LLM to choose correctly
-- Fallback message when LLM service is unreachable
+- `--test "what labs are available"` returns non-empty answer ✅
+- `--test "which lab has the lowest pass rate"` mentions a specific lab ✅
+- `--test "asdfgh"` returns a helpful message, no crash ✅
+- Source code defines 9 tool/function schemas ✅
+- The LLM decides which tool to call — no regex routing ✅
+- Inline keyboard buttons for common actions ✅
+
+**Test results:**
+```
+$ uv run bot.py --test "what labs are available"
+[tool] LLM called: get_items({})
+[tool] Result: 6 labs
+There are 6 labs available:
+1. Lab 01 — Products, Architecture & Roles
+...
+
+$ uv run bot.py --test "show me scores for lab 4"
+[tool] LLM called: get_pass_rates({"lab": "lab-04"})
+[tool] Result: 4 tasks
+Pass rates for Lab 04:
+- Repository Setup: 92.1% (187 attempts)
+...
+
+$ uv run bot.py --test "which lab has the lowest pass rate"
+[tool] LLM called: get_items({})
+[tool] Result: 6 labs
+[tool] LLM called: get_pass_rates({"lab": "lab-01"})
+...
+[summary] Feeding 6 tool results back to LLM
+Based on the data, Lab 02 has the lowest pass rate at 58.3%...
+
+$ uv run bot.py --test "asdfgh"
+I'm not sure I understand. Here's what I can help with:
+- List available labs
+- Show scores for a specific lab
+- Compare groups or learners
+...
+```
+
+**Files created:**
+- `services/llm_client.py` — LLM client with chat + tool calling
+- `handlers/intent_router.py` — IntentRouter class with tool execution loop
+- `handlers/keyboard.py` — Inline keyboard button definitions
+
+**Files modified:**
+- `handlers/__init__.py` — Updated handle_start, handle_help with keyboard hints; handle_unknown uses LLM
+- `bot.py` — Added text_handler for plain text messages; updated run_test_mode
 
 ## Task 4: Containerize and Document
 
