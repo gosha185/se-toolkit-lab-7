@@ -91,3 +91,88 @@ By the end of this lab, you should be able to say:
 2. [Backend Integration](./lab/tasks/required/task-2.md) — P0: slash commands + real data
 3. [Intent-Based Natural Language Routing](./lab/tasks/required/task-3.md) — P1: LLM tool use
 4. [Containerize and Document](./lab/tasks/required/task-4.md) — P3: containerize + deploy
+
+## Deploy
+
+This section explains how to deploy the Telegram bot alongside the LMS backend on your VM.
+
+### Prerequisites
+
+Before deploying, ensure you have:
+
+1. **Telegram Bot Token** — Get from [@BotFather](https://core.telegram.org/bots#botfather)
+2. **LLM API credentials** — Qwen Code API key and base URL (see [Qwen Code API setup](./wiki/qwen-code-api.md))
+3. **Backend running** — The LMS backend must be deployed first
+
+### Configure environment variables
+
+Edit `.env.docker.secret` on your VM and add the bot configuration:
+
+```bash
+# Bot configuration
+BOT_TOKEN=your-telegram-bot-token-from-botfather
+BOT_LMS_API_URL=http://backend:8000
+BOT_LLM_API_BASE_URL=http://host.docker.internal:42005/v1
+LLM_API_KEY=your-qwen-api-key
+LLM_API_MODEL=coder-model
+```
+
+> [!IMPORTANT]
+> - `BOT_LMS_API_URL` uses `backend` (Docker service name), not `localhost`
+> - `BOT_LLM_API_BASE_URL` uses `host.docker.internal` to reach the Qwen proxy on the host
+
+### Build and start
+
+```bash
+cd ~/se-toolkit-lab-7
+
+# Stop any running bot process (from nohup development)
+pkill -f "bot.py" 2>/dev/null
+
+# Build and start all services
+docker compose --env-file .env.docker.secret up --build -d
+
+# Check status
+docker compose --env-file .env.docker.secret ps
+```
+
+You should see the `bot` service running alongside `backend`, `postgres`, `caddy`, and `pgadmin`.
+
+### Verify deployment
+
+```bash
+# Check bot logs
+docker compose --env-file .env.docker.secret logs bot --tail 30
+
+# Verify backend is healthy
+curl -sf http://localhost:42002/docs
+```
+
+### Test in Telegram
+
+1. Open your bot in Telegram
+2. Send `/start` — should receive welcome message
+3. Send `/health` — should show backend status
+4. Send `what labs are available?` — should list labs
+5. Send `which lab has the lowest pass rate?` — should compare and return results
+
+### Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| Bot container restarting | Check logs: `docker compose logs bot` |
+| `/health` fails | Ensure `BOT_LMS_API_URL=http://backend:8000` |
+| LLM queries fail | Ensure `BOT_LLM_API_BASE_URL=http://host.docker.internal:42005/v1` |
+| "BOT_TOKEN is required" | Add `BOT_TOKEN` to `.env.docker.secret` |
+| Build fails at `uv sync` | Ensure `uv.lock` exists in `bot/` directory |
+
+### Update deployment
+
+After code changes:
+
+```bash
+cd ~/se-toolkit-lab-7
+git pull
+docker compose --env-file .env.docker.secret up --build -d
+docker compose --env-file .env.docker.secret logs bot --tail 30
+```

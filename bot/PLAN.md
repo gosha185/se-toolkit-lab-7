@@ -191,12 +191,12 @@ I'm not sure I understand. Here's what I can help with:
 - `handlers/__init__.py` — Updated handle_start, handle_help with keyboard hints; handle_unknown uses LLM
 - `bot.py` — Added text_handler for plain text messages; updated run_test_mode
 
-## Task 4: Containerize and Document
+## Task 4: Containerize and Document ✅ COMPLETED
 
 **Goal:** Deploy the bot alongside the existing backend on the VM.
 
 **Deliverables:**
-- `bot/Dockerfile` — container image for the bot
+- `bot/Dockerfile` — container image for the bot using uv
 - Update `docker-compose.yml` to add bot service
 - Update `.env.docker.example` with bot configuration
 - README documentation for deployment
@@ -204,13 +204,49 @@ I'm not sure I understand. Here's what I can help with:
 **Key concept: Docker Networking**
 
 Containers use service names, not `localhost`:
-- Bot → Backend: `http://backend:42002` (not `localhost:42002`)
-- Bot → LLM: configured via environment variable
+- Bot → Backend: `http://backend:8000` (not `localhost:42002`)
+- Bot → LLM: `http://host.docker.internal:42005/v1` (Qwen proxy is on a different network)
 
 **Acceptance criteria:**
-- `docker compose up` starts bot and backend together
-- Bot responds to commands in Telegram
-- README documents how to deploy
+- `bot/Dockerfile` exists ✅
+- `docker-compose.yml` includes a `bot` service ✅
+- Bot container running (`docker ps` shows it) ✅
+- Backend still healthy (`curl -sf http://localhost:42002/docs` returns 200) ✅
+- README has a section with "Deploy" in heading ✅
+- Bot responds in Telegram from the container ✅
+
+**Files created:**
+- `bot/Dockerfile` — Multi-stage build with uv
+
+**Files modified:**
+- `docker-compose.yml` — Added `bot` service with networking and env vars
+- `.env.docker.example` — Added bot environment variables
+- `README.md` — Added "Deploy" section with instructions
+
+**Environment variables for Docker:**
+
+| Variable | Purpose | Value |
+|----------|---------|-------|
+| `BOT_TOKEN` | Telegram bot token | From @BotFather |
+| `BOT_LMS_API_URL` | Backend URL | `http://backend:8000` |
+| `BOT_LLM_API_BASE_URL` | LLM API URL | `http://host.docker.internal:42005/v1` |
+| `LLM_API_KEY` | LLM API key | From Qwen Code setup |
+| `LLM_API_MODEL` | Model name | `coder-model` |
+| `LLM_API_MODEL` | Model name | `coder-model` |
+
+**Deploy commands:**
+
+```bash
+# Stop nohup bot
+pkill -f "bot.py"
+
+# Build and start
+docker compose --env-file .env.docker.secret up --build -d
+
+# Check status
+docker compose --env-file .env.docker.secret ps
+docker compose --env-file .env.docker.secret logs bot --tail 30
+```
 
 ## Testing Strategy
 
