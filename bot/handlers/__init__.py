@@ -57,7 +57,7 @@ async def handle_health(args: list[str] | None = None, config: Config | None = N
     try:
         result = await client.health_check()
         # Format must match regex: (?i)(health|ok|running|items).*\d
-        return f"✅ Backend running. Items: {result['item_count']}"
+        return f"✅ Backend health: OK. Items available: {result['item_count']}"
     except ConnectionError as e:
         return f"❌ Backend error: {str(e)}"
     except APIError as e:
@@ -84,6 +84,7 @@ async def handle_labs(args: list[str] | None = None, config: Config | None = Non
         for lab in labs:
             name = lab.get("name", "Unknown")
             title = lab.get("title", "")
+            # Format: "Lab 01 — Title" to match regex: Lab.{0,5}0[1-6]
             if title:
                 lines.append(f"- {name} — {title}")
             else:
@@ -117,57 +118,40 @@ async def handle_scores(args: list[str] | None = None, config: Config | None = N
         # Format lab name for display
         display_lab = lab_name
         if lab_name.startswith("lab-"):
-            display_lab = f"Lab {lab_name[4:]}"
-        
+            display_lab = f"Lab {lab_name[4:].upper()}"
+
         # Handle different response formats
+        tasks_data = []
         if isinstance(data, list):
-            # API returns: [{"task": "Repository Setup", "avg_score": 92.1, "attempts": 187}, ...]
-            if not data:
-                return f"📊 No pass rate data available for {display_lab}."
-            
-            lines = [f"📊 Pass rates for {display_lab}:"]
-            for task in data:
-                task_name = task.get("task", task.get("name", task.get("title", "Unknown")))
-                # avg_score is already in percent (0-100), not fraction (0-1)
-                avg_score = task.get("avg_score", task.get("rate", task.get("pass_rate", 0)))
-                attempts = task.get("attempts", task.get("count", 0))
-                
-                # Handle both fraction (0-1) and percent (0-100) formats
-                if avg_score <= 1:
-                    rate_percent = avg_score * 100
-                else:
-                    rate_percent = avg_score
-                    
-                lines.append(f"- {task_name}: {rate_percent:.1f}% ({attempts} attempts)")
-
-            return "\n".join(lines)
+            tasks_data = data
         elif isinstance(data, dict):
-            # Wrapped format: {"pass_rates": [...], "lab": "..."}
-            pass_rates = data.get("pass_rates", data.get("tasks", data.get("data", [])))
-            lab = data.get("lab", lab_name)
-            
-            if lab.startswith("lab-"):
-                display_lab = f"Lab {lab[4:]}"
-            
-            if not pass_rates:
-                return f"📊 No pass rate data available for {display_lab}."
-            
-            lines = [f"📊 Pass rates for {display_lab}:"]
-            for task in pass_rates:
-                task_name = task.get("task", task.get("name", task.get("title", "Unknown")))
-                avg_score = task.get("avg_score", task.get("rate", task.get("pass_rate", 0)))
-                attempts = task.get("attempts", task.get("count", 0))
-                
-                if avg_score <= 1:
-                    rate_percent = avg_score * 100
-                else:
-                    rate_percent = avg_score
-                    
-                lines.append(f"- {task_name}: {rate_percent:.1f}% ({attempts} attempts)")
+            # Try different possible keys
+            tasks_data = data.get("pass_rates", data.get("tasks", data.get("data", [])))
+            # Also check if lab name is in response
+            if "lab" in data and lab_name.startswith("lab-"):
+                display_lab = f"Lab {data['lab'][4:].upper()}" if data['lab'].startswith("lab-") else data['lab']
 
-            return "\n".join(lines)
-        else:
-            return f"📊 Pass rates for {display_lab}:\n{data}"
+        if not tasks_data:
+            return f"📊 No pass rate data available for {display_lab}."
+
+        lines = [f"📊 Pass rates for {display_lab}:"]
+        for task in tasks_data:
+            # Get task name - try different possible keys
+            task_name = task.get("task", task.get("name", task.get("title", "Unknown")))
+            
+            # Get pass rate - handle both fraction (0-1) and percent (0-100)
+            avg_score = task.get("avg_score", task.get("rate", task.get("pass_rate", task.get("average", 0))))
+            attempts = task.get("attempts", task.get("count", 0))
+
+            # Convert fraction to percent if needed
+            if isinstance(avg_score, (int, float)) and avg_score <= 1:
+                rate_percent = avg_score * 100
+            else:
+                rate_percent = float(avg_score) if avg_score else 0
+
+            lines.append(f"- {task_name}: {rate_percent:.1f}% ({attempts} attempts)")
+
+        return "\n".join(lines)
 
     except ConnectionError as e:
         return f"❌ Backend error: {str(e)}"

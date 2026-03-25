@@ -93,21 +93,29 @@ class APIClient:
             # Filter for labs only (type == "lab")
             labs = []
             for item in items:
-                if isinstance(item, dict) and item.get("type") == "lab":
-                    name = item.get("name", "Unknown")
-                    title = item.get("title", item.get("description", ""))
+                if not isinstance(item, dict):
+                    continue
                     
-                    # Convert "lab-01" to "Lab 01" for display
-                    display_name = name
-                    if name.startswith("lab-"):
-                        lab_num = name[4:]  # Get "01" from "lab-01"
-                        display_name = f"Lab {lab_num}"
+                item_type = item.get("type", "")
+                
+                # Check if it's a lab (type could be "lab", "Lab", etc.)
+                if str(item_type).lower() != "lab":
+                    continue
                     
-                    labs.append({
-                        "id": item.get("id", name),
-                        "name": display_name,
-                        "title": title
-                    })
+                name = item.get("name", "Unknown")
+                title = item.get("title", item.get("description", ""))
+
+                # Convert "lab-01" to "Lab 01" for display
+                display_name = name
+                if name.lower().startswith("lab-"):
+                    lab_num = name[4:]  # Get "01" from "lab-01"
+                    display_name = f"Lab {lab_num}"
+
+                labs.append({
+                    "id": item.get("id", name),
+                    "name": display_name,
+                    "title": title
+                })
             return labs
         except (ConnectionError, APIError):
             raise
